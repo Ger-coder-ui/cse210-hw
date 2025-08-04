@@ -1,173 +1,143 @@
 using System;
+using System.Collections.Generic;
+using System.Text;
 
-class Program
+namespace ProductOrdering
 {
-    static void Main(string[] args)
-    {
-         // Encapsulated Address class
     public class Address
     {
-        private string street;
-        private string city;
-        private string stateOrProvince;
-        private string country;
+        private string _street;
+        private string _city;
+        private string _stateOrProvince;
+        private string _country;
 
         public Address(string street, string city, string stateOrProvince, string country)
         {
-            this.street = street;
-            this.city = city;
-            this.stateOrProvince = stateOrProvince;
-            this.country = country;
+            _street = street;
+            _city = city;
+            _stateOrProvince = stateOrProvince;
+            _country = country;
         }
 
         public bool IsInUSA()
         {
-            return country.Trim().ToLower() == "usa";
+            return _country.Trim().Equals("USA", StringComparison.OrdinalIgnoreCase);
         }
 
-        public string GetFullAddress()
+        public string GetFormattedAddress()
         {
-            return $"{street}\n{city}, {stateOrProvince}\n{country}";
+            return $"{_street}\n{_city}, {_stateOrProvince}\n{_country}";
         }
     }
 
-    // Encapsulated Customer class
     public class Customer
     {
-        private string name;
-        private Address address;
+        private string _name;
+        private Address _address;
 
         public Customer(string name, Address address)
         {
-            this.name = name;
-            this.address = address;
+            _name = name;
+            _address = address;
         }
 
-        public string GetName()
-        {
-            return name;
-        }
+        public string GetName() => _name;
 
-        public Address GetAddress()
-        {
-            return address;
-        }
+        public Address GetAddress() => _address;
 
-        public bool LivesInUSA()
-        {
-            return address.IsInUSA();
-        }
+        public bool LivesInUSA() => _address.IsInUSA();
     }
 
-    // Encapsulated Product class
     public class Product
     {
-        private string name;
-        private string productId;
-        private double price;
-        private int quantity;
+        private string _name;
+        private string _id;
+        private double _unitPrice;
+        private int _quantity;
 
-        public Product(string name, string productId, double price, int quantity)
+        public Product(string name, string id, double unitPrice, int quantity)
         {
-            this.name = name;
-            this.productId = productId;
-            this.price = price;
-            this.quantity = quantity;
+            _name = name;
+            _id = id;
+            _unitPrice = unitPrice;
+            _quantity = quantity;
         }
 
-        public double GetTotalCost()
-        {
-            return price * quantity;
-        }
+        public double GetTotalCost() => _unitPrice * _quantity;
 
-        public string GetPackingInfo()
-        {
-            return $"{name} (ID: {productId})";
-        }
+        public string GetPackingInfo() => $"{_name} (ID: {_id})";
     }
 
-    // Encapsulated Order class
     public class Order
     {
-        private List<Product> products;
-        private Customer customer;
+        private List<Product> _products = new List<Product>();
+        private Customer _customer;
 
         public Order(Customer customer)
         {
-            this.customer = customer;
-            products = new List<Product>();
+            _customer = customer;
         }
 
-        public void AddProduct(Product product)
-        {
-            products.Add(product);
-        }
+        public void AddProduct(Product p) => _products.Add(p);
 
-        public double GetTotalCost()
+        public IReadOnlyList<Product> GetProducts() => _products.AsReadOnly();
+
+        public double GetTotalPrice()
         {
             double total = 0;
-            foreach (var product in products)
-            {
-                total += product.GetTotalCost();
-            }
-            total += customer.LivesInUSA() ? 5 : 35;
+            foreach (var p in _products)
+                total += p.GetTotalCost();
+
+            total += _customer.LivesInUSA() ? 5 : 35;
             return total;
         }
 
         public string GetPackingLabel()
         {
-            StringBuilder sb = new StringBuilder();
-            sb.AppendLine("Packing Label:");
-            foreach (var product in products)
-            {
-                sb.AppendLine(product.GetPackingInfo());
-            }
+            var sb = new StringBuilder("Packing Label:\n");
+            foreach (var p in _products)
+                sb.AppendLine(p.GetPackingInfo());
             return sb.ToString();
         }
 
         public string GetShippingLabel()
         {
-            return $"Shipping Label:\n{customer.GetName()}\n{customer.GetAddress().GetFullAddress()}";
+            return $"Shipping Label:\n{_customer.GetName()}\n{_customer.GetAddress().GetFormattedAddress()}";
         }
     }
 
     class Program
     {
-        static void Main(string[] args)
+        static void Main()
         {
-            // Create addresses
-            Address usaAddress = new Address("123 Main St", "New York", "NY", "USA");
-            Address canadaAddress = new Address("456 Maple Rd", "Toronto", "ON", "Canada");
+            var addr1 = new Address("123 Main St", "New York", "NY", "USA");
+            var addr2 = new Address("456 Maple Rd", "Toronto", "ON", "Canada");
 
-            // Create customers
-            Customer customer1 = new Customer("John Smith", usaAddress);
-            Customer customer2 = new Customer("Anna Lee", canadaAddress);
+            var cust1 = new Customer("John Smith", addr1);
+            var cust2 = new Customer("Anna Lee", addr2);
 
-            // Create products
-            Product product1 = new Product("Wireless Mouse", "WM100", 25.99, 2);
-            Product product2 = new Product("Keyboard", "KB200", 45.50, 1);
-            Product product3 = new Product("USB-C Cable", "UC300", 10.00, 3);
-            Product product4 = new Product("Monitor Stand", "MS400", 30.00, 1);
+            var prod1 = new Product("Wireless Mouse", "WM100", 25.99, 2);
+            var prod2 = new Product("Keyboard", "KB200", 45.50, 1);
+            var prod3 = new Product("USB‑C Cable", "UC300", 10.00, 3);
+            var prod4 = new Product("Monitor Stand", "MS400", 30.00, 1);
 
-            // Create orders
-            Order order1 = new Order(customer1);
-            order1.AddProduct(product1);
-            order1.AddProduct(product2);
+            var o1 = new Order(cust1);
+            o1.AddProduct(prod1);
+            o1.AddProduct(prod2);
 
-            Order order2 = new Order(customer2);
-            order2.AddProduct(product3);
-            order2.AddProduct(product4);
+            var o2 = new Order(cust2);
+            o2.AddProduct(prod3);
+            o2.AddProduct(prod4);
 
-            // Display order 1
-            Console.WriteLine(order1.GetPackingLabel());
-            Console.WriteLine(order1.GetShippingLabel());
-            Console.WriteLine($"Total Price: ${order1.GetTotalCost():0.00}");
-            Console.WriteLine(new string('-', 40));
-
-            // Display order 2
-            Console.WriteLine(order2.GetPackingLabel());
-            Console.WriteLine(order2.GetShippingLabel());
-            Console.WriteLine($"Total Price: ${order2.GetTotalCost():0.00}");
+            foreach (var (order, num) in new List<(Order, int)> { (o1,1), (o2,2) })
+            {
+                Console.WriteLine($"=== Order #{num} ===");
+                Console.WriteLine(order.GetPackingLabel());
+                Console.WriteLine(order.GetShippingLabel());
+                Console.WriteLine($"Total Price: ${order.GetTotalPrice():F2}");
+                Console.WriteLine();
+            }
         }
     }
 }
+
