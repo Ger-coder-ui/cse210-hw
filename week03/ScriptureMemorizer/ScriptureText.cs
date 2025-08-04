@@ -22,7 +22,7 @@ public class ScriptureText
         Console.Writeline(Reference);
         foreach (var word in Words)
         {
-            console.Write(word.Dsiplay + " ");
+            console.Write(word.Display + " ");
         }
         Console.WriteLine();
     }
